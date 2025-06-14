@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'Edit' if pack else 'New' }} Pack</h1>
+<form method="post">
+  Name:<br>
+  <input type="text" name="name" value="{{ pack.name if pack else '' }}"><br>
+  Items (comma separated product IDs):<br>
+  <input type="text" name="items" value="{{ pack.items if pack else '' }}"><br>
+  Price:<br>
+  <input type="number" step="0.01" name="price" value="{{ pack.price if pack else '' }}"><br>
+  <button type="submit">Save</button>
+</form>
+{% endblock %}
