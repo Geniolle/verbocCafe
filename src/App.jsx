@@ -12,6 +12,8 @@ export default function App() {
   const [items, setItems] = useState('');
   const [packPrice, setPackPrice] = useState('');
   const [orderItems, setOrderItems] = useState([]);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showPackModal, setShowPackModal] = useState(false);
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('posData')) || { products: [], packs: [] };
@@ -47,6 +49,15 @@ export default function App() {
     setPacks(packs.filter(p => p.id !== id));
   };
 
+  const togglePackItem = (name) => {
+    const current = items ? items.split(',').map(i => i.trim()) : [];
+    if (current.includes(name)) {
+      setItems(current.filter(i => i !== name).join(', '));
+    } else {
+      setItems([...current, name].join(', '));
+    }
+  };
+
   const addToOrder = (product) => {
     setOrderItems([...orderItems, product]);
   };
@@ -71,17 +82,21 @@ export default function App() {
 
   return (
     <div className="app">
-      <div style={{ flex: 1 }}>
+      <div className="main">
         <h2>Products</h2>
-        <div className="product-grid">
-          {products.map(p => (
-            <div key={p.id} className="product-card" onClick={() => addToOrder(p)}>
-              {p.image && <img src={p.image} alt={p.name} />}
-              <div>{p.name}</div>
-              <div>€{p.price}</div>
-            </div>
-          ))}
+        <div className="product-list">
+          <div className="product-grid">
+            {products.map(p => (
+              <div key={p.id} className="product-card" onClick={() => addToOrder(p)}>
+                {p.image && <img src={p.image} alt={p.name} />}
+                <div>{p.name}</div>
+                <div>€{p.price}</div>
+              </div>
+            ))}
+          </div>
         </div>
+        <button onClick={() => setShowProductModal(true)}>Add Product</button>
+        <button onClick={() => setShowPackModal(true)}>Packs</button>
 
         <div className="packs">
           <h2>Packs</h2>
@@ -95,20 +110,8 @@ export default function App() {
               </li>
             ))}
           </ul>
-          <input placeholder="Name" value={packName} onChange={e => setPackName(e.target.value)} />
-          <input placeholder="Items" value={items} onChange={e => setItems(e.target.value)} />
-          <input placeholder="Price" value={packPrice} onChange={e => setPackPrice(e.target.value)} />
-          <button onClick={addPack}>Add Pack</button>
         </div>
-
-        <div className="manage">
-          <h3>Add Product</h3>
-          <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-          <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} />
-          <input placeholder="Image URL" value={image} onChange={e => setImage(e.target.value)} />
-          <button onClick={addProduct}>Add Product</button>
-          <button onClick={exportExcel}>Export to Excel</button>
-        </div>
+        <button onClick={exportExcel}>Export to Excel</button>
       </div>
 
       <div className="order">
@@ -124,6 +127,39 @@ export default function App() {
         <div style={{ marginTop: 10 }}>Total: €{total.toFixed(2)}</div>
         <button onClick={clearOrder}>Clear Order</button>
       </div>
+
+      {showProductModal && (
+        <div className="modal">
+          <h3>Add Product</h3>
+          <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+          <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} />
+          <input placeholder="Image URL" value={image} onChange={e => setImage(e.target.value)} />
+          <button onClick={addProduct}>Save</button>
+          <button onClick={() => setShowProductModal(false)}>Close</button>
+        </div>
+      )}
+
+      {showPackModal && (
+        <div className="modal">
+          <h3>Add Pack</h3>
+          <input placeholder="Name" value={packName} onChange={e => setPackName(e.target.value)} />
+          <div className="pack-items">
+            {products.map(p => (
+              <label key={p.id}>
+                <input
+                  type="checkbox"
+                  checked={(items.split(',').map(i => i.trim()).includes(p.name))}
+                  onChange={() => togglePackItem(p.name)}
+                />
+                {p.name}
+              </label>
+            ))}
+          </div>
+          <input placeholder="Price" value={packPrice} onChange={e => setPackPrice(e.target.value)} />
+          <button onClick={addPack}>Save</button>
+          <button onClick={() => setShowPackModal(false)}>Close</button>
+        </div>
+      )}
     </div>
   );
 }
