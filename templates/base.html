@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+  <title>Simple POS</title>
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('list_products') }}">Products</a> |
+    <a href="{{ url_for('list_packs') }}">Packs</a>
+  </nav>
+  <hr>
+  {% block content %}{% endblock %}
+</body>
+</html>
