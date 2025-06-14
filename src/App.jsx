@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from "xlsx";
+import './App.css';
 
 export default function App() {
   const [products, setProducts] = useState([]);
   const [packs, setPacks] = useState([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [image, setImage] = useState('');
   const [packName, setPackName] = useState('');
   const [items, setItems] = useState('');
   const [packPrice, setPackPrice] = useState('');
+  const [orderItems, setOrderItems] = useState([]);
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('posData')) || { products: [], packs: [] };
@@ -22,9 +25,10 @@ export default function App() {
 
   const addProduct = () => {
     const nextId = products.reduce((m, p) => Math.max(m, p.id || 0), 0) + 1;
-    setProducts([...products, { id: nextId, name, price }]);
+    setProducts([...products, { id: nextId, name, price, image }]);
     setName('');
     setPrice('');
+    setImage('');
   };
 
   const deleteProduct = (id) => {
@@ -43,6 +47,19 @@ export default function App() {
     setPacks(packs.filter(p => p.id !== id));
   };
 
+  const addToOrder = (product) => {
+    setOrderItems([...orderItems, product]);
+  };
+
+  const addPackToOrder = (pack) => {
+    const packItems = pack.items.split(',').map(i => i.trim()).map(name => products.find(p => p.name === name)).filter(Boolean);
+    setOrderItems([...orderItems, ...packItems]);
+  };
+
+  const clearOrder = () => setOrderItems([]);
+
+  const total = orderItems.reduce((sum, p) => sum + parseFloat(p.price || 0), 0);
+
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
     const wsProducts = XLSX.utils.json_to_sheet(products);
@@ -53,36 +70,59 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Products</h1>
-      <ul>
-        {products.map(p => (
-          <li key={p.id}>
-            {p.name} - {p.price}
-            <button onClick={() => deleteProduct(p.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-      <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} />
-      <button onClick={addProduct}>Add Product</button>
+    <div className="app">
+      <div style={{ flex: 1 }}>
+        <h2>Products</h2>
+        <div className="product-grid">
+          {products.map(p => (
+            <div key={p.id} className="product-card" onClick={() => addToOrder(p)}>
+              {p.image && <img src={p.image} alt={p.name} />}
+              <div>{p.name}</div>
+              <div>€{p.price}</div>
+            </div>
+          ))}
+        </div>
 
-      <h1>Packs</h1>
-      <ul>
-        {packs.map(p => (
-          <li key={p.id}>
-            {p.name} - {p.items} - {p.price}
-            <button onClick={() => deletePack(p.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <input placeholder="Name" value={packName} onChange={e => setPackName(e.target.value)} />
-      <input placeholder="Items" value={items} onChange={e => setItems(e.target.value)} />
-      <input placeholder="Price" value={packPrice} onChange={e => setPackPrice(e.target.value)} />
-      <button onClick={addPack}>Add Pack</button>
+        <div className="packs">
+          <h2>Packs</h2>
+          <ul>
+            {packs.map(p => (
+              <li key={p.id}>
+                <button onClick={() => addPackToOrder(p)}>
+                  {p.name} ({p.items}) - €{p.price}
+                </button>
+                <button onClick={() => deletePack(p.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+          <input placeholder="Name" value={packName} onChange={e => setPackName(e.target.value)} />
+          <input placeholder="Items" value={items} onChange={e => setItems(e.target.value)} />
+          <input placeholder="Price" value={packPrice} onChange={e => setPackPrice(e.target.value)} />
+          <button onClick={addPack}>Add Pack</button>
+        </div>
 
-      <div style={{ marginTop: 20 }}>
-        <button onClick={exportExcel}>Export to Excel</button>
+        <div className="manage">
+          <h3>Add Product</h3>
+          <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+          <input placeholder="Price" value={price} onChange={e => setPrice(e.target.value)} />
+          <input placeholder="Image URL" value={image} onChange={e => setImage(e.target.value)} />
+          <button onClick={addProduct}>Add Product</button>
+          <button onClick={exportExcel}>Export to Excel</button>
+        </div>
+      </div>
+
+      <div className="order">
+        <h2>Order</h2>
+        <ul>
+          {orderItems.map((item, i) => (
+            <li key={i} className="order-item">
+              <span>{item.name}</span>
+              <span>€{item.price}</span>
+            </li>
+          ))}
+        </ul>
+        <div style={{ marginTop: 10 }}>Total: €{total.toFixed(2)}</div>
+        <button onClick={clearOrder}>Clear Order</button>
       </div>
     </div>
   );

@@ -1,0 +1,59 @@
+.app {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.product-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  margin-bottom: 5px;
+}
+
+.order, .packs {
+  width: 250px;
+}
+
+.order ul, .packs ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.manage {
+  margin-top: 20px;
+}
+
+.manage input {
+  display: block;
+  margin-bottom: 8px;
+  padding: 4px;
+}
+
+.manage button {
+  margin-bottom: 10px;
+}
